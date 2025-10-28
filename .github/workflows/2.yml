@@ -82,16 +82,8 @@ jobs:
 
       - name: Install Latest Tailscale
         run: |
-          $tsUrl = "https://pkgs.tailscale.com/stable/tailscale-setup-latest.msi"
-          $installerPath = "$env:TEMP\tailscale-latest.msi"
-          
-          Write-Host "Downloading latest Tailscale from $tsUrl..."
-          Invoke-WebRequest -Uri $tsUrl -OutFile $installerPath
-          
-          Write-Host "Installing Tailscale..."
-          Start-Process msiexec.exe -ArgumentList "/i", "`"$installerPath`"", "/quiet", "/norestart" -Wait
-          
-          Remove-Item $installerPath -Force
+          Write-Host "Installing Tailscale via winget..."
+          winget install --id Tailscale.Tailscale -e --accept-package-agreements --source winget
           Write-Host "Tailscale installed."
 
       - name: Establish Tailscale Connection
@@ -142,4 +134,5 @@ jobs:
           Write-Host "`nThis workflow will remain active for up to 6 hours."
           
           Start-Sleep -Seconds 21600
+
 
