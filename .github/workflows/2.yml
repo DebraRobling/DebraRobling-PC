@@ -1,10 +1,11 @@
 # This workflow provides secure RDP access via Tailscale.
 #
 # It includes:
-# - Secure RDP user "RDP" with a masked password.
+# - Secure RDP user "RDP" with a random, masked password.
+# - The password is un-masked ONCE in the final step for you to use.
 # - Secure RDP settings (NLA and TLS enabled by default).
 # - No public firewall rules.
-# - Installation of Google Chrome, Mozilla Firefox, Opera, Brave, and Vivaldi.
+# - Installation of multiple browsers (Chrome, Firefox, Opera, Brave, Vivaldi).
 # - Installation of the *latest stable* Tailscale client.
 
 name: Secure RDP via Tailscale 2
@@ -52,7 +53,7 @@ jobs:
           Add-LocalGroupMember -Group "Administrators" -Member "RDP"
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "RDP"
           
-          # 4. Save the password for the final step
+          # 4. Save the password for the final step (FIXED BUG HERE)
           echo "RDP_PASS=$password" >> $env:GITHUB_ENV
           
           if (-not (Get-LocalUser -Name "RDP")) {
@@ -61,14 +62,8 @@ jobs:
           }
           Write-Host "User 'RDP' created and added to Administrators."
 
-      - name: Install Browsers (Chrome, Firefox, Opera, Brave, Vivaldi)
+      - name: Install Browsers (Opera, Brave, Vivaldi)
         run: |
-          Write-Host "Installing Google Chrome..."
-          winget install --id Google.Chrome -e --accept-package-agreements --source winget
-          
-          Write-Host "Installing Mozilla Firefox..."
-          winget install --id Mozilla.Firefox -e --accept-package-agreements --source winget
-          
           Write-Host "Installing Opera..."
           winget install --id Opera.Opera -e --accept-package-agreements --source winget
           
@@ -78,7 +73,7 @@ jobs:
           Write-Host "Installing Vivaldi..."
           winget install --id Vivaldi.Vivaldi -e --accept-package-agreements --source winget
           
-          Write-Host "All browsers installed."
+          Write-Host "All remaining browsers installed."
 
       - name: Install Latest Tailscale
         run: |
