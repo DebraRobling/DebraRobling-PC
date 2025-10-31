@@ -23,23 +23,24 @@ jobs:
           
           Write-Host "Token obtained successfully"
           
-          # Create auth key payload with tags at root level
-          $payload = @{
-              capabilities = @{
-                  devices = @{
-                      create = @{
-                          reusable = $true
-                          ephemeral = $true
-                          preauthorized = $true
-                      }
-                  }
+          # Create auth key payload - simpler format
+          $jsonPayload = @"
+          {
+            "capabilities": {
+              "devices": {
+                "create": {
+                  "reusable": true,
+                  "ephemeral": true,
+                  "preauthorized": true
+                }
               }
-              expirySeconds = 3600
-              description = "GitHub RDP Runner"
-              tags = @("tag:gitrd")
+            },
+            "expirySeconds": 3600,
+            "description": "GitHub RDP Runner",
+            "tags": ["tag:gitrd"]
           }
+"@
           
-          $jsonPayload = $payload | ConvertTo-Json -Depth 10
           Write-Host "Payload: $jsonPayload"
           
           # Generate auth key
