@@ -21,28 +21,34 @@ jobs:
           $tokenData = $tokenResponse.Content | ConvertFrom-Json
           $apiToken = $tokenData.access_token
           
-          # Create auth key payload
-          $payload = @{
-              capabilities = @{
-                  devices = @{
-                      create = @{
-                          reusable = $true
-                          ephemeral = $true
-                          preauthorized = $true
-                          tags = @("tag:gitrd")
-                      }
+          Write-Host "Token obtained: $($apiToken.Substring(0,10))..."
+          
+          # Create auth key payload - SIMPLIFIED
+          $capabilities = @{
+              devices = @{
+                  create = @{
+                      reusable = $true
+                      ephemeral = $true
+                      preauthorized = $true
                   }
               }
+          }
+          
+          $payload = @{
+              capabilities = $capabilities
               expirySeconds = 3600
               description = "GitHub RDP Runner"
-          } | ConvertTo-Json
+          }
+          
+          $jsonPayload = $payload | ConvertTo-Json -Depth 10
+          Write-Host "Payload: $jsonPayload"
           
           # Generate auth key
           $authKeyResponse = Invoke-WebRequest -Uri "https://api.tailscale.com/api/v2/tailnet/-/keys" `
             -Method POST `
             -Headers @{Authorization = "Bearer $apiToken"} `
             -ContentType "application/json" `
-            -Body $payload `
+            -Body $jsonPayload `
             -UseBasicParsing
           
           $authKeyData = $authKeyResponse.Content | ConvertFrom-Json
@@ -50,9 +56,11 @@ jobs:
           
           if (-not $authKey) {
               Write-Error "Failed to generate auth key"
+              Write-Host "Response: $($authKeyResponse.Content)"
               exit 1
           }
           
+          Write-Host "Auth key generated successfully"
           echo "TAILSCALE_AUTH_KEY=$authKey" >> $env:GITHUB_ENV
 
       - name: Configure Core RDP Settings
