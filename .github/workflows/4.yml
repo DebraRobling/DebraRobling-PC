@@ -21,23 +21,22 @@ jobs:
           $tokenData = $tokenResponse.Content | ConvertFrom-Json
           $apiToken = $tokenData.access_token
           
-          Write-Host "Token obtained: $($apiToken.Substring(0,10))..."
+          Write-Host "Token obtained successfully"
           
-          # Create auth key payload - SIMPLIFIED
-          $capabilities = @{
-              devices = @{
-                  create = @{
-                      reusable = $true
-                      ephemeral = $true
-                      preauthorized = $true
+          # Create auth key payload with tags at root level
+          $payload = @{
+              capabilities = @{
+                  devices = @{
+                      create = @{
+                          reusable = $true
+                          ephemeral = $true
+                          preauthorized = $true
+                      }
                   }
               }
-          }
-          
-          $payload = @{
-              capabilities = $capabilities
               expirySeconds = 3600
               description = "GitHub RDP Runner"
+              tags = @("tag:gitrd")
           }
           
           $jsonPayload = $payload | ConvertTo-Json -Depth 10
